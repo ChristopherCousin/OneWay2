@@ -24,10 +24,9 @@ public class CharController : MonoBehaviour {
         if (!inArrows)
         {
             GetInput();
-            move();
         } else
         {
-            //Aqui poner animacion cuando entra en arrows
+            move();
         }
 	}
 
@@ -38,11 +37,12 @@ public class CharController : MonoBehaviour {
 
     private void GetInput()
     {
-        direction = Vector2.zero;
+        //direction = Vector2.zero;
 
         if (Input.GetKey(KeyCode.W))
         {
             direction = Vector2.up;
+            move();
             setAnimation("walkUp", true);
         }
         else if (Input.GetKeyUp(KeyCode.W))
@@ -52,6 +52,7 @@ public class CharController : MonoBehaviour {
         if (Input.GetKey(KeyCode.A))
         {
             direction = Vector2.left;
+            move();
             setAnimation("walkLeft", true);
         }
         else if (Input.GetKeyUp(KeyCode.A))
@@ -61,6 +62,7 @@ public class CharController : MonoBehaviour {
         if (Input.GetKey(KeyCode.S))
         {
             direction = Vector2.down;
+            move();
             setAnimation("walkDown", true);
         }
         else if (Input.GetKeyUp(KeyCode.S))
@@ -70,6 +72,7 @@ public class CharController : MonoBehaviour {
         if (Input.GetKey(KeyCode.D))
         {
             direction = Vector2.right;
+            move();
             setAnimation("walkRigth", true);
         }
         else if (Input.GetKeyUp(KeyCode.D))
@@ -100,57 +103,77 @@ public class CharController : MonoBehaviour {
             animationsList.Add(_animator.GetParameter(x).name);
         }
     }
-    private void OnTriggerStay2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "RightArrow") moveInArrows("right");
-        if (collision.gameObject.tag == "LeftArrow") moveInArrows("left");
-        if (collision.gameObject.tag == "DownArrow") moveInArrows("down");
-        if (collision.gameObject.tag == "UpArrow") moveInArrows("up");
-    }
+        if(collision.gameObject.tag == "RightArrow" || collision.gameObject.tag == "LeftArrow"
+            || collision.gameObject.tag == "DownArrow" || collision.gameObject.tag == "UpArrow")
+        {
+            foreach (string animationName in animationsList)
+            {
+                _animator.SetBool(animationName, false);
+            }
+        }
 
-    private void OnTriggerExit2D(Collider2D collision)
+        TriggerCollisions(collision);
+
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "RightArrow")
+        NormalCollisions(collision);
+    }
+    void TriggerCollisions(Collider2D col)
+    {
+        switch (col.gameObject.tag)
         {
-            inArrows = false;
-            transform.Translate(Vector2.right * _MovementSpeed * Time.deltaTime);
+            case "RightArrow":
+                moveInArrows("right");
+                break;
+            case "LeftArrow":
+                moveInArrows("left");
+                break;
+            case "DownArrow":
+                moveInArrows("down");
+                break;
+            case "UpArrow":
+                moveInArrows("up");
+                break;
         }
-        else if (collision.gameObject.tag == "LeftArrow")
+    }
+    void NormalCollisions(Collision2D col)
+    {
+        switch (col.gameObject.tag)
         {
-            inArrows = false;
-            transform.Translate(Vector2.left * _MovementSpeed * Time.deltaTime);
-        }
-        else if (collision.gameObject.tag == "DownArrow")
-        {
-            inArrows = false;
-            transform.Translate(Vector2.down * _MovementSpeed * Time.deltaTime);
-        }
-        else if (collision.gameObject.tag == "UpArrow")
-        {
-            inArrows = false;
-            transform.Translate(Vector2.up * _MovementSpeed * Time.deltaTime);
+            case "wall":
+                moveInArrows("wall");
+                break;
         }
     }
 
     void moveInArrows(string value)
     {
-        inArrows = true;
-
-        if (value.Equals("right"))
+        switch (value)
         {
-            transform.Translate(Vector2.right * _MovementSpeed * Time.deltaTime);
-        }
-        if (value.Equals("left"))
-        {
-            transform.Translate(Vector2.left * _MovementSpeed * Time.deltaTime);
-        }
-        if (value.Equals("up"))
-        {
-            transform.Translate(Vector2.up * _MovementSpeed * Time.deltaTime);
-        }
-        if (value.Equals("down"))
-        {
-            transform.Translate(Vector2.down * _MovementSpeed * Time.deltaTime);
+            case "right":
+                direction = Vector2.right;
+                inArrows = true;
+                break;
+            case "left":
+                direction = Vector2.left;
+                inArrows = true;
+                break;
+            case "down":
+                direction = Vector2.down;
+                inArrows = true;
+                break;
+            case "up":
+                direction = Vector2.up;
+                inArrows = true;
+                break;
+            case "wall":
+                inArrows = false;
+                direction = Vector2.zero;
+                break;
         }
     }
+
 }

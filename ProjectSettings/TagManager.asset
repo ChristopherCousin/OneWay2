@@ -8,6 +8,7 @@ TagManager:
   - LeftArrow
   - DownArrow
   - UpArrow
+  - wall
   layers:
   - Default
   - TransparentFX
