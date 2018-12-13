@@ -9,19 +9,26 @@ public class CharController : MonoBehaviour {
     private Vector2 direction;
     private Animator _animator;
     int animationCount;
+    bool inArrows;
     List<string> animationsList = new List<string>();
 
 	void Start () {
         _animator = gameObject.GetComponent<Animator>();
         animationCount = _animator.parameterCount;
         getAnimationsParameters();
-
+        inArrows = false;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        GetInput();
-        move();
+        if (!inArrows)
+        {
+            GetInput();
+            move();
+        } else
+        {
+            //Aqui poner animacion cuando entra en arrows
+        }
 	}
 
     public void move()
@@ -91,6 +98,59 @@ public class CharController : MonoBehaviour {
         for(int x = 0; x < animationCount; x++)
         {
             animationsList.Add(_animator.GetParameter(x).name);
+        }
+    }
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "RightArrow") moveInArrows("right");
+        if (collision.gameObject.tag == "LeftArrow") moveInArrows("left");
+        if (collision.gameObject.tag == "DownArrow") moveInArrows("down");
+        if (collision.gameObject.tag == "UpArrow") moveInArrows("up");
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "RightArrow")
+        {
+            inArrows = false;
+            transform.Translate(Vector2.right * _MovementSpeed * Time.deltaTime);
+        }
+        else if (collision.gameObject.tag == "LeftArrow")
+        {
+            inArrows = false;
+            transform.Translate(Vector2.left * _MovementSpeed * Time.deltaTime);
+        }
+        else if (collision.gameObject.tag == "DownArrow")
+        {
+            inArrows = false;
+            transform.Translate(Vector2.down * _MovementSpeed * Time.deltaTime);
+        }
+        else if (collision.gameObject.tag == "UpArrow")
+        {
+            inArrows = false;
+            transform.Translate(Vector2.up * _MovementSpeed * Time.deltaTime);
+        }
+    }
+
+    void moveInArrows(string value)
+    {
+        inArrows = true;
+
+        if (value.Equals("right"))
+        {
+            transform.Translate(Vector2.right * _MovementSpeed * Time.deltaTime);
+        }
+        if (value.Equals("left"))
+        {
+            transform.Translate(Vector2.left * _MovementSpeed * Time.deltaTime);
+        }
+        if (value.Equals("up"))
+        {
+            transform.Translate(Vector2.up * _MovementSpeed * Time.deltaTime);
+        }
+        if (value.Equals("down"))
+        {
+            transform.Translate(Vector2.down * _MovementSpeed * Time.deltaTime);
         }
     }
 }
