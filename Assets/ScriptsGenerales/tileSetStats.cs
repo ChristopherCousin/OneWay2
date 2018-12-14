@@ -5,13 +5,13 @@ using UnityEngine;
 public class tileSetStats : MonoBehaviour {
 
 
-    public Component[] walls;
+    public SpriteRenderer[] walls;
     public string[] spriteNames;
     List<GameObject> arrows;
 
     void Start () {
         setWalls();
-
+        
     }
 	
 	// Update is called once per frame
@@ -21,17 +21,18 @@ public class tileSetStats : MonoBehaviour {
 
     void setWalls()
     {
-        walls = GetComponentsInChildren<Component>();
+        walls = GetComponentsInChildren<SpriteRenderer>();
         
-        foreach(Component wall in walls)
+        foreach(SpriteRenderer wall in walls)
         {
-            string n = wall.GetComponent<SpriteRenderer>().sprite.ToString();
-            Debug.Log(n);
-            
-            if(wall.GetComponent<SpriteRenderer>().sprite.Equals("asd_52") || wall.GetComponent<SpriteRenderer>().sprite.Equals("asd_52")
-                || wall.GetComponent<SpriteRenderer>().sprite.Equals("asd_52"))
+            //string n = renderer.tileMode.ToString();
+            //Debug.Log(wall.gameObject.GetComponent<SpriteRenderer>().);
+            //string n = wall.sprite;
+            Debug.Log(wall.sprite.ToString());
+            if(wall.gameObject.GetComponent<SpriteRenderer>().GetInstanceID() == 6418 || wall.gameObject.GetComponent<SpriteRenderer>().GetInstanceID() == 3338
+                || wall.gameObject.GetComponent<SpriteRenderer>().GetInstanceID() == 3340)
             {
-                Debug.Log(wall.GetComponent<SpriteRenderer>().sprite);
+                Debug.Log("adasd");
             }
         }
     }

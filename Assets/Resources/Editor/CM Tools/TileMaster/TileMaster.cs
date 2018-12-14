@@ -24,9 +24,11 @@ public class TileMaster : EditorWindow {
 	static List<Transform> layers = new List<Transform>();
 	static bool highlightLayer = false;
     static Vector2 drawBox;
-	static bool makeCollider = false;
-	//static bool toggleAdvanced = false; //Added it for features later down the line possibly.
-	static EditorWindow window;
+	static bool makeArrow = false;
+    static bool makeWall = false;
+    static string tagStr = "";
+    //static bool toggleAdvanced = false; //Added it for features later down the line possibly.
+    static EditorWindow window;
 	static int renameId = -1;
 	static Texture2D texVisible;
 	static Texture2D texHidden;
@@ -74,6 +76,7 @@ public class TileMaster : EditorWindow {
 		layers[index].name = "New Layer";
 		layers[index].transform.parent = cmquad.transform;
 		SpriteRenderer tmpRenderer = layers[index].gameObject.AddComponent<SpriteRenderer>();
+        layers[index].gameObject.AddComponent<Rigidbody2D>();
 		tmpRenderer.sortingOrder = index;
 	}
 	
@@ -180,7 +183,7 @@ public class TileMaster : EditorWindow {
 			} 
 
 			//Mode variable to swith between major features.
-			string[] mode = {"Tile Painter", "Help Video"};//, "Pad Tileset"};// Pad tileset not finished yet, removed to allow for earlier release. You can try it out if you want, but is has issues with larger images and places tiles in the wrong order.
+			string[] mode = {"Tile Painter", "VictorNOOB"};//, "Pad Tileset"};// Pad tileset not finished yet, removed to allow for earlier release. You can try it out if you want, but is has issues with larger images and places tiles in the wrong order.
 			curMode = GUILayout.Toolbar(curMode, mode);
 
 			if(curMode == 0)
@@ -217,11 +220,17 @@ public class TileMaster : EditorWindow {
 				EditorGUILayout.EndHorizontal();
 
 				EditorGUILayout.BeginHorizontal();
-				EditorGUILayout.LabelField("Paint With Collider",GUILayout.Width(150));
-				makeCollider = EditorGUILayout.Toggle(makeCollider);
-				EditorGUILayout.EndHorizontal();
+				EditorGUILayout.LabelField("Paint arrows?",GUILayout.Width(150));
+                makeArrow = EditorGUILayout.Toggle(makeArrow);
+                tagStr = EditorGUILayout.TagField("Tag ?", tagStr);
+                EditorGUILayout.EndHorizontal();
 
-				EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("You'll Paint Wall?", GUILayout.Width(150));
+                makeWall = EditorGUILayout.Toggle(makeWall);
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
 				EditorGUILayout.LabelField("Highlight Current Layer",GUILayout.Width(150));
 				highlightLayer = EditorGUILayout.Toggle(highlightLayer, GUILayout.Width(25));
 				highlightColor = EditorGUILayout.ColorField(highlightColor);
@@ -464,7 +473,7 @@ public class TileMaster : EditorWindow {
 				destroyFlag = -1;
 			}else if(curMode == 1){
 				curMode = 0;
-				Application.OpenURL("https://www.youtube.com/watch?v=mxy9HdNM-is");
+				Application.OpenURL("https://www.google.com/search?ei=cQ0TXMblKbCO1fAPm9KfmAQ&q=VictorSalidoFrutos+is+a+noob+Programmer&oq=VictorSalidoFrutos+is+a+noob+Programmer&gs_l=psy-ab.3...5429.13757..15229...10.0..0.143.3705.0j29......0....1..gws-wiz.......35i302i39j33i160j33i21.uqfBr69NW-Q");
 				return;
 			}else if(curMode == 2){
 				int tmpInt = EditorGUILayout.Popup("Tileset", cmSelectedTileSet, names);
@@ -930,6 +939,11 @@ public class TileMaster : EditorWindow {
 	
     static GameObject GenerateTile(float x, float y)
     {
+        if (tagStr == "" && makeArrow)
+        {
+            EditorUtility.DisplayDialog("TAG!", "You must select TAG for the arrow", "Soy Victor..");
+            return null;
+        }
         GameObject tmpObj = null;
 		if(curLayer != null)
 		{
@@ -959,29 +973,49 @@ public class TileMaster : EditorWindow {
         tmpObj.transform.parent = layers[selectedLayer];
 		tmpObj.GetComponent<SpriteRenderer>().sortingOrder = layers[selectedLayer].GetComponent<SpriteRenderer>().sortingOrder;
 		tmpObj.transform.localScale = new Vector3 (1,1,1);
-		PolygonCollider2D tmpCol = tmpObj.GetComponent<PolygonCollider2D>();
-		if(tmpCol == null && makeCollider)
+        Rigidbody2D tmpRig = tmpObj.GetComponent<Rigidbody2D>();
+        BoxCollider2D tmpColl = tmpObj.GetComponent<BoxCollider2D>();
+        //if yes add
+        if (tmpRig == null && makeArrow || tmpRig == null && makeWall)
 		{
-			tmpCol = tmpObj.AddComponent<PolygonCollider2D>();
-			Vector2[] points =
-								{
-									new Vector2(-.5f,.49f),
-									new Vector2(-.45f,.5f),
-									new Vector2(.45f,.5f),
-									new Vector2(.5f,.49f),
-									new Vector2(.5f,-.45f),
-									new Vector2(.45f,-.5f),
-									new Vector2(-.45f,-.5f),
-									new Vector2(-.5f,-.45f)
-							};
-			tmpCol.points = points;
-		}
-		if(tmpCol != null && !makeCollider)
-		{
-			Undo.DestroyObjectImmediate(tmpCol);
-		}
-		//Repaint();
-		SceneView.RepaintAll();
+            tmpRig = tmpObj.AddComponent<Rigidbody2D>();
+            tmpRig.gravityScale = 0;
+            tmpRig.constraints = RigidbodyConstraints2D.FreezeAll; 
+        }
+        //if yes add
+        if (tmpColl == null && makeWall)
+        {
+            tmpColl = tmpObj.AddComponent<BoxCollider2D>();
+            tmpColl.size = new Vector2(1, 1);
+            if(tagStr == null) tagStr = "wall";
+            if(tmpObj.tag != "") tmpObj.tag = tagStr;
+        }
+        if (tmpColl == null && makeArrow)
+        {
+            tmpColl = tmpObj.AddComponent<BoxCollider2D>();
+            tmpColl.size = new Vector2(1, 1);
+            tmpColl.isTrigger = true;
+        }
+        // ---------------- Start Destroy part -------------------------
+        if (tmpRig != null && !makeArrow)
+        {
+            Undo.DestroyObjectImmediate(tmpRig);    
+        }
+        else if (tmpColl != null && !makeArrow)
+        {
+            Undo.DestroyObjectImmediate(tmpColl);
+        }
+        else if (tmpRig != null && !makeWall)
+        {
+            Undo.DestroyObjectImmediate(tmpRig);
+        }
+        else if (tmpColl != null && !makeWall)
+        {
+            Undo.DestroyObjectImmediate(tmpColl);
+        }
+        // ------------------ End Destroy Part -----------------------
+        //Repaint();
+        SceneView.RepaintAll();
         return tmpObj;
     }
 }
