@@ -183,7 +183,7 @@ public class TileMaster : EditorWindow {
 			} 
 
 			//Mode variable to swith between major features.
-			string[] mode = {"Tile Painter", "VictorNOOB"};//, "Pad Tileset"};// Pad tileset not finished yet, removed to allow for earlier release. You can try it out if you want, but is has issues with larger images and places tiles in the wrong order.
+			string[] mode = {"Tile Painter", "Christopher Cousin"};//, "Pad Tileset"};// Pad tileset not finished yet, removed to allow for earlier release. You can try it out if you want, but is has issues with larger images and places tiles in the wrong order.
 			curMode = GUILayout.Toolbar(curMode, mode);
 
 			if(curMode == 0)
@@ -980,7 +980,7 @@ public class TileMaster : EditorWindow {
 		{
             tmpRig = tmpObj.AddComponent<Rigidbody2D>();
             tmpRig.gravityScale = 0;
-            tmpRig.constraints = RigidbodyConstraints2D.FreezeAll; 
+            tmpRig.constraints = RigidbodyConstraints2D.FreezeAll;
         }
         //if yes add
         if (tmpColl == null && makeWall)
@@ -992,6 +992,7 @@ public class TileMaster : EditorWindow {
         }
         if (tmpColl == null && makeArrow)
         {
+            tmpObj.tag = tagStr;
             tmpColl = tmpObj.AddComponent<BoxCollider2D>();
             tmpColl.size = new Vector2(1, 1);
             tmpColl.isTrigger = true;
